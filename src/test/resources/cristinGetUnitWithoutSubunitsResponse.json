@@ -1,0 +1,17 @@
+{
+  "cristin_unit_id": "194.63.10.0",
+  "unit_name": {
+    "en": "Department of Computer Science"
+  },
+  "institution": {
+    "cristin_institution_id": "194",
+    "url": "https://api.cristin.no/v2/institutions/194"
+  },
+  "parent_unit": {
+    "cristin_unit_id": "194.63.0.0",
+    "unit_name": {
+      "en": "Faculty of Information Technology and Electrical Engineering"
+    },
+    "url": "https://api.cristin.no/v2/units/194.63.0.0"
+  }
+}
