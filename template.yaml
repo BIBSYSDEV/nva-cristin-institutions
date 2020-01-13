@@ -57,14 +57,14 @@ Resources:
       Runtime: java8
       MemorySize: 512
       Events:
-        NvaBareFetchEvent:
+        NvaCristinFetchInstitutionsEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Auth:
               Authorizer: MyCognitoAuthorizer
             RestApiId: !Ref NvaCristinInstitutionsApi
             Path: /
-            Method: post
+            Method: get
             RequestParameters:
               - method.request.querystring.language
               - method.request.querystring.name
