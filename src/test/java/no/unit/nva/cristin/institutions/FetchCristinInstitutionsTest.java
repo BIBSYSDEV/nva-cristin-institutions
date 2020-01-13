@@ -66,8 +66,10 @@ public class FetchCristinInstitutionsTest {
 
     @Test
     public void testFetchCristinInstitutionsSuccessfulResponse() throws Exception {
-        when(mockCristinApiClient.fetchQueryInstitutionsResults(any())).thenReturn(mockQueryCristinQueryInstitutionResponseReader());
-        when(mockCristinApiClient.fetchGetInstitutionResult(any())).thenAnswer(i -> mockGetCristinGetInstitutionResponseReader());
+        when(mockCristinApiClient.fetchQueryInstitutionsResults(any()))
+                .thenReturn(mockQueryCristinQueryInstitutionResponseReader());
+        when(mockCristinApiClient.fetchGetInstitutionResult(any()))
+                .thenAnswer(i -> mockGetCristinGetInstitutionResponseReader());
         when(mockCristinApiClient.queryInstitutions(any())).thenCallRealMethod();
         when(mockCristinApiClient.getInstitution(any(), any())).thenCallRealMethod();
         when(mockCristinApiClient.generateQueryInstitutionsUrl(any())).thenCallRealMethod();
@@ -106,7 +108,8 @@ public class FetchCristinInstitutionsTest {
 
     @Test
     public void testSuccessfulResponseWithGetInstitutionFailure() throws Exception {
-        when(mockCristinApiClient.fetchQueryInstitutionsResults(any())).thenReturn(mockQueryCristinQueryInstitutionResponseReader());
+        when(mockCristinApiClient.fetchQueryInstitutionsResults(any()))
+                .thenReturn(mockQueryCristinQueryInstitutionResponseReader());
         when(mockCristinApiClient.queryInstitutions(any())).thenCallRealMethod();
         when(mockCristinApiClient.getInstitution(any(), any())).thenThrow(new IOException("Mock exception"));
         when(mockCristinApiClient.generateQueryInstitutionsUrl(any())).thenCallRealMethod();

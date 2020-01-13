@@ -23,7 +23,8 @@ public class CristinApiClient {
     private static final String CRISTIN_API_INSTITUTIONS_PATH = "/v2/institutions/";
     private static final String CRISTIN_API_UNITS_PATH = "/v2/units/";
 
-    protected List<Institution> queryInstitutions(Map<String, String> parameters) throws IOException, URISyntaxException {
+    protected List<Institution> queryInstitutions(Map<String, String> parameters) throws
+            IOException, URISyntaxException {
         URL url = generateQueryInstitutionsUrl(parameters);
         try (InputStreamReader streamReader = fetchQueryInstitutionsResults(url)) {
             return asList(fromJson(streamReader, Institution[].class));
@@ -68,7 +69,8 @@ public class CristinApiClient {
         return uri.build().toURL();
     }
 
-    protected URL generateGetInstitutionUrl(String id, String language) throws MalformedURLException, URISyntaxException {
+    protected URL generateGetInstitutionUrl(String id, String language) throws
+            MalformedURLException, URISyntaxException {
         URI uri = new URIBuilder()
                 .setScheme(HTTPS)
                 .setHost(CRISTIN_API_HOST)

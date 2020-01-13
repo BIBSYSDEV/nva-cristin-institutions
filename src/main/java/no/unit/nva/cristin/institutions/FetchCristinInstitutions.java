@@ -26,8 +26,8 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
 
     private static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
     private static final String NAME_IS_NULL = "Parameter 'name' is mandatory";
-    private static final String NAME_ILLEGAL_CHARACTERS = "Parameter 'name' may only contain alphanumeric " +
-            "characters, dash and whitespace";
+    private static final String NAME_ILLEGAL_CHARACTERS = "Parameter 'name' may only contain alphanumeric "
+            + "characters, dash and whitespace";
     private static final String LANGUAGE_INVALID = "Parameter 'language' has invalid value";
     private static final String ERROR_KEY = "error";
     private static final String DEFAULT_LANGUAGE_CODE = "nb";
@@ -86,7 +86,8 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
                         try {
                             return cristinApiClient.getInstitution(institution.cristinInstitutionId, language);
                         } catch (IOException | URISyntaxException e) {
-                            System.out.println("Error fetching cristin institution with id: " + institution.cristinInstitutionId);
+                            System.out.println("Error fetching cristin institution with id: "
+                                    + institution.cristinInstitutionId);
                         }
                         return institution;
                     })

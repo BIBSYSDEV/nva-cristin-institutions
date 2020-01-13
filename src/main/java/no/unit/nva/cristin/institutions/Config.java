@@ -1,6 +1,5 @@
 package no.unit.nva.cristin.institutions;
 
-import org.apache.commons.lang3.StringUtils;
 
 public class Config {
 

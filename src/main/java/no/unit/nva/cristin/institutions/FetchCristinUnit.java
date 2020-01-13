@@ -49,7 +49,7 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
     public GatewayResponse handleRequest(Map<String, Object> input, Context context) {
 
         GatewayResponse gatewayResponse = new GatewayResponse();
-        Map<String, String> queryStringParameters = (Map<String, String>) input.get(QUERY_STRING_PARAMETERS_KEY);
+
         Map<String, String> pathParameters = (Map<String, String>) input.get(PATH_PARAMETERS_KEY);
         String id = pathParameters.getOrDefault("id", "");
         if (id.isEmpty()) {
@@ -58,6 +58,7 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
             return gatewayResponse;
         }
 
+        Map<String, String> queryStringParameters = (Map<String, String>) input.get(QUERY_STRING_PARAMETERS_KEY);
         String language = queryStringParameters.getOrDefault("language", DEFAULT_LANGUAGE_CODE);
         if (!VALID_LANGUAGE_CODES.contains(language)) {
             gatewayResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());

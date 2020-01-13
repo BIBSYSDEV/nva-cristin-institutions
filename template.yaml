@@ -9,6 +9,14 @@ Description: >
 Globals:
   Function:
     Timeout: 20
+  Api:
+    Cors:
+      AllowCredentials: true
+      AllowOrigin: !Sub
+        - "'${Domain}'"
+        - Domain: !Ref  CorsOrigin
+      AllowMethods: "'OPTIONS, GET'"
+      AllowHeaders: "'Content-Type'"
 
 Parameters:
   CognitoAuthorizerArn:
@@ -26,7 +34,7 @@ Parameters:
 
 Resources:
 
-  NvaCristinInstitutionsFunctionApi:
+  NvaCristinInstitutionsApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
@@ -34,16 +42,10 @@ Resources:
         Authorizers:
           MyCognitoAuthorizer:
             UserPoolArn: !Ref CognitoAuthorizerArn
-      Cors:
-        AllowCredentials: true
-        AllowOrigin: !Sub
-          - "'${Domain}'"
-          - Domain: !Ref  CorsOrigin
-        AllowMethods: "'OPTIONS, GET'"
       EndpointConfiguration: Regional
 
 
-  NvaCristinInstitutionsFunction:
+  NvaCristinFetchInstitutionsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       Environment:
@@ -55,23 +57,48 @@ Resources:
       Runtime: java8
       MemorySize: 512
       Events:
-        NvaCristinInstitutionsEvent:
+        NvaBareFetchEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Auth:
               Authorizer: MyCognitoAuthorizer
-            RestApiId: !Ref NvaCristinInstitutionsFunctionApi
+            RestApiId: !Ref NvaCristinInstitutionsApi
             Path: /
             Method: post
             RequestParameters:
               - method.request.querystring.language
-              - method.request.querystring.title
+              - method.request.querystring.name
+  #            RequestModel:
+  #              Model: Map<String, Object> # REQUIRED; must match the name of a model defined in the Models property of the AWS::Serverless::API
+  #              Required: true # OPTIONAL; boolean
 
-  NvaCristinInstitutionsFunctionBasePathMapping:
+  NvaCristinFetchUnitFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      Environment:
+        Variables:
+          AllowOrigin: !Sub
+            - "${Domain}"
+            - Domain: !Ref  CorsOrigin
+      Handler: no.unit.nva.cristin.institutions.FetchCristinUnit::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Events:
+        NvaCristinFetchUnitEvent:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Auth:
+              Authorizer: MyCognitoAuthorizer
+            RestApiId: !Ref NvaCristinInstitutionsApi
+            Path: /unit/{id}
+            Method: get
+            RequestParameters:
+              - method.request.querystring.language
+
+  NvaCristinInstitutionsBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
       BasePath: !Ref CustomDomainBasePath
       DomainName: !Ref CustomDomain
-      RestApiId: !Ref NvaCristinInstitutionsFunctionApi
-      Stage: !Ref NvaCristinInstitutionsFunctionApi.Stage
-
+      RestApiId: !Ref NvaCristinInstitutionsApi
+      Stage: !Ref NvaCristinInstitutionsApi.Stage
