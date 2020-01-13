@@ -22,6 +22,8 @@ import java.util.TreeMap;
  */
 public class FetchCristinUnit implements RequestHandler<Map<String, Object>, GatewayResponse> {
 
+    private static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
+    private static final String PATH_PARAMETERS_KEY = "pathParameters";
     private static final String ID_IS_NULL = "Parameter 'id' is mandatory";
     private static final String LANGUAGE_INVALID = "Parameter 'language' has invalid value";
     private static final String ERROR_KEY = "error";
@@ -47,8 +49,8 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
     public GatewayResponse handleRequest(Map<String, Object> input, Context context) {
 
         GatewayResponse gatewayResponse = new GatewayResponse();
-        Map<String, String> queryStringParameters = (Map<String, String>) input.get("queryStringParameters");
-        Map<String, String> pathParameters = (Map<String, String>) input.get("pathParameters");
+        Map<String, String> queryStringParameters = (Map<String, String>) input.get(QUERY_STRING_PARAMETERS_KEY);
+        Map<String, String> pathParameters = (Map<String, String>) input.get(PATH_PARAMETERS_KEY);
         String id = pathParameters.getOrDefault("id", "");
         if (id.isEmpty()) {
             gatewayResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());

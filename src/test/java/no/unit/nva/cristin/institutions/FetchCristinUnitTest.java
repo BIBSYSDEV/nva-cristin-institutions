@@ -13,8 +13,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -87,6 +90,73 @@ public class FetchCristinUnitTest {
 
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatusCode());
         assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
+    }
+
+    @Test
+    public void testErrorResponse() throws Exception {
+        when(mockCristinApiClient.getUnit(any(), any())).thenThrow(new IOException("Mock exception"));
+
+        Map<String, Object> event = new HashMap<>();
+
+        Map<String, String> pathParams = new TreeMap<>();
+        pathParams.put("id", PATH_PARAM_ID_NTNU);
+        event.put("pathParameters", pathParams);
+
+        Map<String, String> queryParams = new TreeMap<>();
+        queryParams.put("language", QUERY_PARAM_LANGUAGE_NB);
+        event.put("queryStringParameters", queryParams);
+
+        FetchCristinUnit mockFetchCristinUnit = new FetchCristinUnit(mockCristinApiClient);
+        GatewayResponse response = mockFetchCristinUnit.handleRequest(event, null);
+
+        assertEquals(Response.Status.SERVICE_UNAVAILABLE.getStatusCode(), response.getStatusCode());
+        assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
+    }
+
+
+    @Test
+    public void testEmptyIdParam() {
+
+        Map<String, Object> event = new HashMap<>();
+        Map<String, String> pathParams = new TreeMap<>();
+        pathParams.put("id", "");
+        event.put("pathParameters", pathParams);
+
+        FetchCristinUnit mockFetchCristinUnit = new FetchCristinUnit(mockCristinApiClient);
+        GatewayResponse response = mockFetchCristinUnit.handleRequest(event, null);
+
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatusCode());
+        assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
+        assertEquals(response.getBody(), "{\"error\":\"Parameter 'id' is mandatory\"}");
+    }
+
+
+    @Test
+    public void testInvalidLanguageParam() {
+
+        Map<String, Object> event = new HashMap<>();
+
+        Map<String, String> pathParams = new TreeMap<>();
+        pathParams.put("id", "ntnu");
+        event.put("pathParameters", pathParams);
+
+        Map<String, String> queryParams = new TreeMap<>();
+        queryParams.put("language", "invalid");
+        event.put("queryStringParameters", queryParams);
+
+        FetchCristinUnit mockFetchCristinUnit = new FetchCristinUnit(mockCristinApiClient);
+        GatewayResponse response = mockFetchCristinUnit.handleRequest(event, null);
+
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatusCode());
+        assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
+        assertEquals(response.getBody(), "{\"error\":\"Parameter 'language' has invalid value\"}");
+    }
+
+    @Test
+    public void testCristinUnitConnection() throws IOException {
+        CristinApiClient cristinApiClient = new CristinApiClient();
+        URL invalidUrl = Paths.get("/dev/null").toUri().toURL();
+        cristinApiClient.fetchGetUnitResult(invalidUrl);
     }
 
 }

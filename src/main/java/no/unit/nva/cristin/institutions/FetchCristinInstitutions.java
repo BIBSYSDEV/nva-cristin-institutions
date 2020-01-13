@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
  */
 public class FetchCristinInstitutions implements RequestHandler<Map<String, Object>, GatewayResponse> {
 
+    private static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
     private static final String NAME_IS_NULL = "Parameter 'name' is mandatory";
     private static final String NAME_ILLEGAL_CHARACTERS = "Parameter 'name' may only contain alphanumeric " +
             "characters, dash and whitespace";
@@ -51,7 +52,7 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
     public GatewayResponse handleRequest(Map<String, Object> input, Context context) {
 
         GatewayResponse gatewayResponse = new GatewayResponse();
-        Map<String, String> queryStringParameters = (Map<String, String>) input.get("queryStringParameters");
+        Map<String, String> queryStringParameters = (Map<String, String>) input.get(QUERY_STRING_PARAMETERS_KEY);
         String name = queryStringParameters.getOrDefault("name", "");
         if (name.isEmpty()) {
             gatewayResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
@@ -118,13 +119,8 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
             institutionPresentation.institutionNames.add(namePresentation);
         });
 
-        if (Optional.ofNullable(institution.acronym).isPresent()) {
-            institutionPresentation.acronym = institution.acronym;
-        }
-
-        if (Optional.ofNullable(institution.country).isPresent()) {
-            institutionPresentation.country = institution.country;
-        }
+        institutionPresentation.acronym = Optional.ofNullable(institution.acronym).orElse("");
+        institutionPresentation.country = Optional.ofNullable(institution.country).orElse("");
 
         if (Optional.ofNullable(institution.correspondingUnit).isPresent()) {
             institutionPresentation.cristinUnitId = institution.correspondingUnit.cristinUnitId;
