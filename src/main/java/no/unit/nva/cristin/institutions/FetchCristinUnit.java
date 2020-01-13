@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Handler for requests to Lambda function.
@@ -59,7 +60,7 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
         }
 
         Map<String, String> queryStringParameters = Optional.ofNullable((Map<String, String>) input
-                .get(QUERY_STRING_PARAMETERS_KEY)).orElse(new TreeMap<>());
+                .get(QUERY_STRING_PARAMETERS_KEY)).orElse(new ConcurrentHashMap<>());
         String language = queryStringParameters.getOrDefault("language", DEFAULT_LANGUAGE_CODE);
         if (!VALID_LANGUAGE_CODES.contains(language)) {
             gatewayResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
