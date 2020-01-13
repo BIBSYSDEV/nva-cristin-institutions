@@ -34,6 +34,7 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
     private static final List<String> VALID_LANGUAGE_CODES = Arrays.asList("nb", "en");
 
     private transient CristinApiClient cristinApiClient;
+    private final transient PresentationConverter presentationConverter = new PresentationConverter();
 
     public FetchCristinInstitutions() {
         cristinApiClient = new CristinApiClient();
@@ -91,7 +92,7 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
                         }
                         return institution;
                     })
-                    .map(this::asInstitutionPresentation)
+                    .map(presentationConverter::asInstitutionPresentation)
                     .collect(Collectors.toList());
 
             Type institutionListType = new TypeToken<ArrayList<InstitutionPresentation>>() {
@@ -108,27 +109,7 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
         return gatewayResponse;
     }
 
-    private InstitutionPresentation asInstitutionPresentation(Institution institution) {
-        InstitutionPresentation institutionPresentation = new InstitutionPresentation();
-        institutionPresentation.cristinInstitutionId = institution.cristinInstitutionId;
 
-        Optional.ofNullable(institution.institutionName).orElse(new TreeMap<String, String>() {
-        }).forEach((key, value) -> {
-            NamePresentation namePresentation = new NamePresentation();
-            namePresentation.language = key;
-            namePresentation.name = value;
-            institutionPresentation.institutionNames.add(namePresentation);
-        });
-
-        institutionPresentation.acronym = Optional.ofNullable(institution.acronym).orElse("");
-        institutionPresentation.country = Optional.ofNullable(institution.country).orElse("");
-
-        if (Optional.ofNullable(institution.correspondingUnit).isPresent()) {
-            institutionPresentation.cristinUnitId = institution.correspondingUnit.cristinUnitId;
-        }
-
-        return institutionPresentation;
-    }
 
     /**
      * Get error message as a json string.

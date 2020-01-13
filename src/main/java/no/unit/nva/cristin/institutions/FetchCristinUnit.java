@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -32,6 +31,7 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
     private static final List<String> VALID_LANGUAGE_CODES = Arrays.asList("nb", "en");
 
     private transient CristinApiClient cristinApiClient;
+    private final transient PresentationConverter presentationConverter = new PresentationConverter();
 
     public FetchCristinUnit() {
         cristinApiClient = new CristinApiClient();
@@ -71,7 +71,7 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
         try {
 
             Unit unit = cristinApiClient.getUnit(id, language);
-            List<UnitPresentation> subunitPresentations = asSubunits(unit);
+            List<UnitPresentation> subunitPresentations = presentationConverter.asSubunits(unit);
             Type unitListType = new TypeToken<ArrayList<UnitPresentation>>() {
             }.getType();
             gatewayResponse.setStatusCode(Response.Status.OK.getStatusCode());
@@ -83,30 +83,6 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
         }
 
         return gatewayResponse;
-    }
-
-    private List<UnitPresentation> asSubunits(Unit unit) {
-
-        List<UnitPresentation> unitPresentations = new ArrayList<>();
-
-        Optional.ofNullable(unit.subunits).orElse(new ArrayList<Unit>() {
-        }).forEach(subunit -> {
-            UnitPresentation unitPresentation = new UnitPresentation();
-
-            unitPresentation.cristinUnitId = subunit.cristinUnitId;
-
-            Optional.ofNullable(subunit.unitName).orElse(new TreeMap<>())
-                    .forEach((language, name) -> {
-                        NamePresentation namePresentation = new NamePresentation();
-                        namePresentation.language = language;
-                        namePresentation.name = name;
-                        unitPresentation.unitNames.add(namePresentation);
-                    });
-
-            unitPresentations.add(unitPresentation);
-        });
-
-        return unitPresentations;
     }
 
 
