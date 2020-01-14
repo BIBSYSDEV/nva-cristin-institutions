@@ -50,23 +50,19 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
     public GatewayResponse handleRequest(Map<String, Object> input, Context context) {
 
         GatewayResponse gatewayResponse = new GatewayResponse();
-
-        Map<String, String> pathParameters = (Map<String, String>) input.get(PATH_PARAMETERS_KEY);
-        String id = pathParameters.getOrDefault("id", "");
-        if (id.isEmpty()) {
+        try {
+            this.checkParameters(input);
+        } catch (RuntimeException e) {
+            gatewayResponse.setErrorBody(e.getMessage());
             gatewayResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
-            gatewayResponse.setBody(getErrorAsJson(ID_IS_NULL));
             return gatewayResponse;
         }
 
+        Map<String, String> pathParameters = (Map<String, String>) input.get(PATH_PARAMETERS_KEY);
+        String id = pathParameters.get("id");
         Map<String, String> queryStringParameters = Optional.ofNullable((Map<String, String>) input
                 .get(QUERY_STRING_PARAMETERS_KEY)).orElse(new ConcurrentHashMap<>());
         String language = queryStringParameters.getOrDefault("language", DEFAULT_LANGUAGE_CODE);
-        if (!VALID_LANGUAGE_CODES.contains(language)) {
-            gatewayResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
-            gatewayResponse.setBody(getErrorAsJson(LANGUAGE_INVALID));
-            return gatewayResponse;
-        }
 
         try {
 
@@ -78,13 +74,28 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
             gatewayResponse.setBody(new Gson().toJson(subunitPresentations, unitListType));
 
         } catch (IOException | URISyntaxException e) {
-            gatewayResponse.setStatusCode(Response.Status.SERVICE_UNAVAILABLE.getStatusCode());
+            gatewayResponse.setStatusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
             gatewayResponse.setBody(getErrorAsJson(e.getMessage()));
         }
 
         return gatewayResponse;
     }
 
+    @SuppressWarnings("unchecked")
+    private void checkParameters(Map<String, Object> input) {
+        Map<String, String> pathParameters = (Map<String, String>) input.get(PATH_PARAMETERS_KEY);
+        String id = pathParameters.getOrDefault("id", "");
+        if (id.isEmpty()) {
+            throw new RuntimeException(ID_IS_NULL);
+
+        }
+        Map<String, String> queryStringParameters = Optional.ofNullable((Map<String, String>) input
+                .get(QUERY_STRING_PARAMETERS_KEY)).orElse(new ConcurrentHashMap<>());
+        String language = queryStringParameters.getOrDefault("language", DEFAULT_LANGUAGE_CODE);
+        if (!VALID_LANGUAGE_CODES.contains(language)) {
+            throw new RuntimeException(LANGUAGE_INVALID);
+        }
+    }
 
     /**
      * Get error message as a json string.

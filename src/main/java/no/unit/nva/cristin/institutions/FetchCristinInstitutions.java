@@ -51,25 +51,17 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
     public GatewayResponse handleRequest(Map<String, Object> input, Context context) {
 
         GatewayResponse gatewayResponse = new GatewayResponse();
-        Map<String, String> queryStringParameters = (Map<String, String>) input.get(QUERY_STRING_PARAMETERS_KEY);
-        String name = queryStringParameters.getOrDefault("name", "");
-        if (name.isEmpty()) {
+        try {
+            this.checkParameters(input);
+        } catch (RuntimeException e) {
+            gatewayResponse.setErrorBody(e.getMessage());
             gatewayResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
-            gatewayResponse.setBody(getErrorAsJson(NAME_IS_NULL));
-            return gatewayResponse;
-        }
-        if (!isValidName(name)) {
-            gatewayResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
-            gatewayResponse.setBody(getErrorAsJson(NAME_ILLEGAL_CHARACTERS));
             return gatewayResponse;
         }
 
+        Map<String, String> queryStringParameters = (Map<String, String>) input.get(QUERY_STRING_PARAMETERS_KEY);
+        String name = queryStringParameters.get("name");
         String language = queryStringParameters.getOrDefault("language", DEFAULT_LANGUAGE_CODE);
-        if (!VALID_LANGUAGE_CODES.contains(language)) {
-            gatewayResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
-            gatewayResponse.setBody(getErrorAsJson(LANGUAGE_INVALID));
-            return gatewayResponse;
-        }
 
         try {
 
@@ -100,7 +92,7 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
             gatewayResponse.setBody(new Gson().toJson(institutionPresentations, institutionListType));
 
         } catch (IOException | URISyntaxException e) {
-            gatewayResponse.setStatusCode(Response.Status.SERVICE_UNAVAILABLE.getStatusCode());
+            gatewayResponse.setStatusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
             gatewayResponse.setBody(getErrorAsJson(e.getMessage()));
         }
 
@@ -108,6 +100,23 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
     }
 
 
+    @SuppressWarnings("unchecked")
+    private void checkParameters(Map<String, Object> input) {
+        Map<String, String> queryStringParameters = (Map<String, String>) input.get(QUERY_STRING_PARAMETERS_KEY);
+        String name = queryStringParameters.getOrDefault("name", "");
+        if (name.isEmpty()) {
+            throw new RuntimeException(NAME_IS_NULL);
+        }
+        if (!isValidName(name)) {
+            throw new RuntimeException(NAME_ILLEGAL_CHARACTERS);
+
+        }
+
+        String language = queryStringParameters.getOrDefault("language", DEFAULT_LANGUAGE_CODE);
+        if (!VALID_LANGUAGE_CODES.contains(language)) {
+            throw new RuntimeException(LANGUAGE_INVALID);
+        }
+    }
 
     /**
      * Get error message as a json string.
