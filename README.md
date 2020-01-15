@@ -1,6 +1,6 @@
 # nva-cristin-institutions
 
-Lambda for fetching institution or unit data from the [Cristin API](https://api.cristin.no/v2/doc/index.html)
+Lambda for fetching institution and unit data from the [Cristin API](https://api.cristin.no/v2/doc/index.html)
 
 
 ### GET cristin-institutions?{parameters}
