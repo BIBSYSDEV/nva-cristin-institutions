@@ -44,6 +44,8 @@ public class FetchCristinUnitTest {
     private static final String EMPTY_STRING = "";
     private static final String LANGUAGE_NB = "nb";
     private static final String ID_NTNU = "194.0.0.0";
+    private static final String MOCK_EXCEPTION = "Mock exception";
+
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
@@ -103,7 +105,7 @@ public class FetchCristinUnitTest {
 
     @Test
     public void testErrorResponse() throws Exception {
-        when(mockCristinApiClient.getUnit(any(), any())).thenThrow(new IOException("Mock exception"));
+        when(mockCristinApiClient.getUnit(any(), any())).thenThrow(new IOException(MOCK_EXCEPTION));
 
         Map<String, Object> event = new HashMap<>();
 

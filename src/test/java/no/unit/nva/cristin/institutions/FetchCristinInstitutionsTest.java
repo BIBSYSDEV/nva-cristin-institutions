@@ -44,6 +44,7 @@ public class FetchCristinInstitutionsTest {
     private static final String NAME_ILLEGAL_CHARACTERS = "abc123- ?";
     private static final String INVALID_JSON = "This is not valid JSON!";
     private static final String DEV_NULL = "/dev/null";
+    private static final String MOCK_EXCEPTION = "Mock exception";
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
@@ -97,7 +98,7 @@ public class FetchCristinInstitutionsTest {
 
     @Test
     public void testQueryErrorResponse() throws Exception {
-        when(mockCristinApiClient.queryInstitutions(any())).thenThrow(new IOException("Mock exception"));
+        when(mockCristinApiClient.queryInstitutions(any())).thenThrow(new IOException(MOCK_EXCEPTION));
 
         Map<String, Object> event = new HashMap<>();
         Map<String, String> queryParams = new TreeMap<>();
@@ -117,7 +118,7 @@ public class FetchCristinInstitutionsTest {
         when(mockCristinApiClient.fetchQueryInstitutionsResults(any()))
                 .thenReturn(mockQueryCristinQueryInstitutionResponseReader());
         when(mockCristinApiClient.queryInstitutions(any())).thenCallRealMethod();
-        when(mockCristinApiClient.getInstitution(any(), any())).thenThrow(new IOException("Mock exception"));
+        when(mockCristinApiClient.getInstitution(any(), any())).thenThrow(new IOException(MOCK_EXCEPTION));
         when(mockCristinApiClient.generateQueryInstitutionsUrl(any())).thenCallRealMethod();
 
         Map<String, Object> event = new HashMap<>();
