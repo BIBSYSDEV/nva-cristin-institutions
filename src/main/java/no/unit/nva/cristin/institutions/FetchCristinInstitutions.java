@@ -23,11 +23,16 @@ import java.util.stream.Collectors;
 public class FetchCristinInstitutions implements RequestHandler<Map<String, Object>, GatewayResponse> {
 
     private static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
+    private static final String NAME_KEY = "name";
+    private static final String LANGUAGE_KEY = "language";
+    private static final String ERROR_KEY = "error";
+
     private static final String NAME_IS_NULL = "Parameter 'name' is mandatory";
     private static final String NAME_ILLEGAL_CHARACTERS = "Parameter 'name' may only contain alphanumeric "
             + "characters, dash and whitespace";
     private static final String LANGUAGE_INVALID = "Parameter 'language' has invalid value";
-    private static final String ERROR_KEY = "error";
+
+    private static final String EMPTY_STRING = "";
     private static final String DEFAULT_LANGUAGE_CODE = "nb";
     private static final List<String> VALID_LANGUAGE_CODES = Arrays.asList("nb", "en");
 
@@ -60,8 +65,8 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
         }
 
         Map<String, String> queryStringParameters = (Map<String, String>) input.get(QUERY_STRING_PARAMETERS_KEY);
-        String name = queryStringParameters.get("name");
-        String language = queryStringParameters.getOrDefault("language", DEFAULT_LANGUAGE_CODE);
+        String name = queryStringParameters.get(NAME_KEY);
+        String language = queryStringParameters.getOrDefault(LANGUAGE_KEY, DEFAULT_LANGUAGE_CODE);
 
         try {
 
@@ -103,7 +108,7 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
     @SuppressWarnings("unchecked")
     private void checkParameters(Map<String, Object> input) {
         Map<String, String> queryStringParameters = (Map<String, String>) input.get(QUERY_STRING_PARAMETERS_KEY);
-        String name = queryStringParameters.getOrDefault("name", "");
+        String name = queryStringParameters.getOrDefault(NAME_KEY, EMPTY_STRING);
         if (name.isEmpty()) {
             throw new RuntimeException(NAME_IS_NULL);
         }
@@ -112,7 +117,7 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
 
         }
 
-        String language = queryStringParameters.getOrDefault("language", DEFAULT_LANGUAGE_CODE);
+        String language = queryStringParameters.getOrDefault(LANGUAGE_KEY, DEFAULT_LANGUAGE_CODE);
         if (!VALID_LANGUAGE_CODES.contains(language)) {
             throw new RuntimeException(LANGUAGE_INVALID);
         }

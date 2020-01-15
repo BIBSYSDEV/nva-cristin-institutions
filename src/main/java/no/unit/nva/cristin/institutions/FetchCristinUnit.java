@@ -24,9 +24,13 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
 
     private static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
     private static final String PATH_PARAMETERS_KEY = "pathParameters";
+    private static final String ID_KEY = "id";
+    private static final String LANGUAGE_KEY = "language";
+    private static final String ERROR_KEY = "error";
+
     private static final String ID_IS_NULL = "Parameter 'id' is mandatory";
     private static final String LANGUAGE_INVALID = "Parameter 'language' has invalid value";
-    private static final String ERROR_KEY = "error";
+
     private static final String DEFAULT_LANGUAGE_CODE = "nb";
     private static final List<String> VALID_LANGUAGE_CODES = Arrays.asList("nb", "en");
 
@@ -59,10 +63,10 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
         }
 
         Map<String, String> pathParameters = (Map<String, String>) input.get(PATH_PARAMETERS_KEY);
-        String id = pathParameters.get("id");
+        String id = pathParameters.get(ID_KEY);
         Map<String, String> queryStringParameters = Optional.ofNullable((Map<String, String>) input
                 .get(QUERY_STRING_PARAMETERS_KEY)).orElse(new ConcurrentHashMap<>());
-        String language = queryStringParameters.getOrDefault("language", DEFAULT_LANGUAGE_CODE);
+        String language = queryStringParameters.getOrDefault(LANGUAGE_KEY, DEFAULT_LANGUAGE_CODE);
 
         try {
 
@@ -84,14 +88,14 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
     @SuppressWarnings("unchecked")
     private void checkParameters(Map<String, Object> input) {
         Map<String, String> pathParameters = (Map<String, String>) input.get(PATH_PARAMETERS_KEY);
-        String id = pathParameters.getOrDefault("id", "");
+        String id = pathParameters.getOrDefault(ID_KEY, "");
         if (id.isEmpty()) {
             throw new RuntimeException(ID_IS_NULL);
 
         }
         Map<String, String> queryStringParameters = Optional.ofNullable((Map<String, String>) input
                 .get(QUERY_STRING_PARAMETERS_KEY)).orElse(new ConcurrentHashMap<>());
-        String language = queryStringParameters.getOrDefault("language", DEFAULT_LANGUAGE_CODE);
+        String language = queryStringParameters.getOrDefault(LANGUAGE_KEY, DEFAULT_LANGUAGE_CODE);
         if (!VALID_LANGUAGE_CODES.contains(language)) {
             throw new RuntimeException(LANGUAGE_INVALID);
         }
