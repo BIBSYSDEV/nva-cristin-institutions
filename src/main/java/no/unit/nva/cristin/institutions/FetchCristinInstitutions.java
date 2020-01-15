@@ -3,7 +3,6 @@ package no.unit.nva.cristin.institutions;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import javax.ws.rs.core.Response;
@@ -25,7 +24,6 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
     private static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
     private static final String NAME_KEY = "name";
     private static final String LANGUAGE_KEY = "language";
-    private static final String ERROR_KEY = "error";
 
     private static final String NAME_IS_NULL = "Parameter 'name' is mandatory";
     private static final String NAME_ILLEGAL_CHARACTERS = "Parameter 'name' may only contain alphanumeric "
@@ -98,7 +96,7 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
 
         } catch (IOException | URISyntaxException e) {
             gatewayResponse.setStatusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-            gatewayResponse.setBody(getErrorAsJson(e.getMessage()));
+            gatewayResponse.setErrorBody(e.getMessage());
         }
 
         return gatewayResponse;
@@ -121,18 +119,6 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
         if (!VALID_LANGUAGE_CODES.contains(language)) {
             throw new RuntimeException(LANGUAGE_INVALID);
         }
-    }
-
-    /**
-     * Get error message as a json string.
-     *
-     * @param message message from exception
-     * @return String containing an error message as json
-     */
-    private String getErrorAsJson(String message) {
-        JsonObject json = new JsonObject();
-        json.addProperty(ERROR_KEY, message);
-        return json.toString();
     }
 
     private boolean isValidName(String str) {
