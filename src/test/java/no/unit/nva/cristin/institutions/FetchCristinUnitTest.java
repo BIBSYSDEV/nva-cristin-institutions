@@ -35,9 +35,15 @@ public class FetchCristinUnitTest {
             "/cristinGetUnitWithSubunitsSecondResponse.json";
     private static final String CRISTIN_GET_UNIT_WITHOUT_SUBUNITS_RESPONSE_JSON_FILE =
             "/cristinGetUnitWithoutSubunitsResponse.json";
-
-    private static final String QUERY_PARAM_LANGUAGE_NB = "nb";
-    private static final String PATH_PARAM_ID_NTNU = "194.0.0.0";
+    private static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
+    private static final String PATH_PARAMETERS_KEY = "pathParameters";
+    private static final String ID_KEY = "id";
+    private static final String LANGUAGE_KEY = "language";
+    private static final String LANGUAGE_INVALID = "invalid";
+    private static final String DEV_NULL = "/dev/null";
+    private static final String EMPTY_STRING = "";
+    private static final String LANGUAGE_NB = "nb";
+    private static final String ID_NTNU = "194.0.0.0";
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
@@ -80,12 +86,12 @@ public class FetchCristinUnitTest {
         Map<String, Object> event = new HashMap<>();
 
         Map<String, String> pathParams = new TreeMap<>();
-        pathParams.put("id", PATH_PARAM_ID_NTNU);
-        event.put("pathParameters", pathParams);
+        pathParams.put(ID_KEY, ID_NTNU);
+        event.put(PATH_PARAMETERS_KEY, pathParams);
 
         Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put("language", QUERY_PARAM_LANGUAGE_NB);
-        event.put("queryStringParameters", queryParams);
+        queryParams.put(LANGUAGE_KEY, LANGUAGE_NB);
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
 
         FetchCristinUnit mockFetchCristinUnit = new FetchCristinUnit();
         mockFetchCristinUnit.setCristinApiClient(mockCristinApiClient);
@@ -102,12 +108,12 @@ public class FetchCristinUnitTest {
         Map<String, Object> event = new HashMap<>();
 
         Map<String, String> pathParams = new TreeMap<>();
-        pathParams.put("id", PATH_PARAM_ID_NTNU);
-        event.put("pathParameters", pathParams);
+        pathParams.put(ID_KEY, ID_NTNU);
+        event.put(PATH_PARAMETERS_KEY, pathParams);
 
         Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put("language", QUERY_PARAM_LANGUAGE_NB);
-        event.put("queryStringParameters", queryParams);
+        queryParams.put(LANGUAGE_KEY, LANGUAGE_NB);
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
 
         FetchCristinUnit mockFetchCristinUnit = new FetchCristinUnit(mockCristinApiClient);
         GatewayResponse response = mockFetchCristinUnit.handleRequest(event, null);
@@ -122,8 +128,8 @@ public class FetchCristinUnitTest {
 
         Map<String, Object> event = new HashMap<>();
         Map<String, String> pathParams = new TreeMap<>();
-        pathParams.put("id", "");
-        event.put("pathParameters", pathParams);
+        pathParams.put(ID_KEY, EMPTY_STRING);
+        event.put(PATH_PARAMETERS_KEY, pathParams);
 
         FetchCristinUnit mockFetchCristinUnit = new FetchCristinUnit(mockCristinApiClient);
         GatewayResponse response = mockFetchCristinUnit.handleRequest(event, null);
@@ -140,12 +146,12 @@ public class FetchCristinUnitTest {
         Map<String, Object> event = new HashMap<>();
 
         Map<String, String> pathParams = new TreeMap<>();
-        pathParams.put("id", "ntnu");
-        event.put("pathParameters", pathParams);
+        pathParams.put(ID_KEY, ID_NTNU);
+        event.put(PATH_PARAMETERS_KEY, pathParams);
 
         Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put("language", "invalid");
-        event.put("queryStringParameters", queryParams);
+        queryParams.put(LANGUAGE_KEY, LANGUAGE_INVALID);
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
 
         FetchCristinUnit mockFetchCristinUnit = new FetchCristinUnit(mockCristinApiClient);
         GatewayResponse response = mockFetchCristinUnit.handleRequest(event, null);
@@ -158,7 +164,7 @@ public class FetchCristinUnitTest {
     @Test
     public void testCristinUnitConnection() throws IOException {
         CristinApiClient cristinApiClient = new CristinApiClient();
-        URL invalidUrl = Paths.get("/dev/null").toUri().toURL();
+        URL invalidUrl = Paths.get(DEV_NULL).toUri().toURL();
         cristinApiClient.fetchGetUnitResult(invalidUrl);
     }
 

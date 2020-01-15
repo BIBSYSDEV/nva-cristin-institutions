@@ -35,9 +35,15 @@ public class FetchCristinInstitutionsTest {
 
     private static final String CRISTIN_GET_INSTITUTION_RESPONSE_JSON_FILE = "/cristinGetInstitutionResponse.json";
     private static final String CRISTIN_QUERY_INSTITUTION_RESPONSE_JSON_FILE = "/cristinQueryInstitutionsResponse.json";
-
-    private static final String QUERY_PARAM_LANGUAGE_NB = "nb";
-    private static final String QUERY_PARAM_NAME_NTNU = "ntnu";
+    private static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
+    private static final String NAME_KEY = "name";
+    private static final String LANGUAGE_KEY = "language";
+    private static final String LANGUAGE_NB = "nb";
+    private static final String LANGUAGE_INVALID = "invalid";
+    private static final String NAME_NTNU = "ntnu";
+    private static final String NAME_ILLEGAL_CHARACTERS = "abc123- ?";
+    private static final String INVALID_JSON = "This is not valid JSON!";
+    private static final String DEV_NULL = "/dev/null";
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
@@ -77,9 +83,9 @@ public class FetchCristinInstitutionsTest {
 
         Map<String, Object> event = new HashMap<>();
         Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put("name", QUERY_PARAM_NAME_NTNU);
-        queryParams.put("language", QUERY_PARAM_LANGUAGE_NB);
-        event.put("queryStringParameters", queryParams);
+        queryParams.put(NAME_KEY, NAME_NTNU);
+        queryParams.put(LANGUAGE_KEY, LANGUAGE_NB);
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
 
         FetchCristinInstitutions mockFetchCristinInstitutions = new FetchCristinInstitutions();
         mockFetchCristinInstitutions.setCristinApiClient(mockCristinApiClient);
@@ -95,9 +101,9 @@ public class FetchCristinInstitutionsTest {
 
         Map<String, Object> event = new HashMap<>();
         Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put("name", QUERY_PARAM_NAME_NTNU);
-        queryParams.put("language", QUERY_PARAM_LANGUAGE_NB);
-        event.put("queryStringParameters", queryParams);
+        queryParams.put(NAME_KEY, NAME_NTNU);
+        queryParams.put(LANGUAGE_KEY, LANGUAGE_NB);
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
 
         FetchCristinInstitutions mockFetchCristinInstitutions = new FetchCristinInstitutions(mockCristinApiClient);
         GatewayResponse response = mockFetchCristinInstitutions.handleRequest(event, null);
@@ -116,9 +122,9 @@ public class FetchCristinInstitutionsTest {
 
         Map<String, Object> event = new HashMap<>();
         Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put("name", QUERY_PARAM_NAME_NTNU);
-        queryParams.put("language", QUERY_PARAM_LANGUAGE_NB);
-        event.put("queryStringParameters", queryParams);
+        queryParams.put(NAME_KEY, NAME_NTNU);
+        queryParams.put(LANGUAGE_KEY, LANGUAGE_NB);
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
 
         FetchCristinInstitutions mockFetchCristinInstitutions = new FetchCristinInstitutions(mockCristinApiClient);
         GatewayResponse response = mockFetchCristinInstitutions.handleRequest(event, null);
@@ -133,8 +139,8 @@ public class FetchCristinInstitutionsTest {
 
         Map<String, Object> event = new HashMap<>();
         Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put("name", "");
-        event.put("queryStringParameters", queryParams);
+        queryParams.put(NAME_KEY, "");
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
 
         FetchCristinInstitutions mockFetchCristinInstitutions = new FetchCristinInstitutions(mockCristinApiClient);
         GatewayResponse response = mockFetchCristinInstitutions.handleRequest(event, null);
@@ -150,8 +156,8 @@ public class FetchCristinInstitutionsTest {
 
         Map<String, Object> event = new HashMap<>();
         Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put("name", "abc123- ?");
-        event.put("queryStringParameters", queryParams);
+        queryParams.put(NAME_KEY, NAME_ILLEGAL_CHARACTERS);
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
 
         FetchCristinInstitutions mockFetchCristinInstitutions = new FetchCristinInstitutions(mockCristinApiClient);
         GatewayResponse response = mockFetchCristinInstitutions.handleRequest(event, null);
@@ -167,9 +173,9 @@ public class FetchCristinInstitutionsTest {
 
         Map<String, Object> event = new HashMap<>();
         Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put("name", "NTNU");
-        queryParams.put("language", "invalid");
-        event.put("queryStringParameters", queryParams);
+        queryParams.put(NAME_KEY, NAME_NTNU);
+        queryParams.put(LANGUAGE_KEY, LANGUAGE_INVALID);
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
 
         FetchCristinInstitutions mockFetchCristinInstitutions = new FetchCristinInstitutions(mockCristinApiClient);
         GatewayResponse response = mockFetchCristinInstitutions.handleRequest(event, null);
@@ -188,22 +194,21 @@ public class FetchCristinInstitutionsTest {
     @Test
     public void testCristinInstitutionsConnection() throws IOException {
         CristinApiClient cristinApiClient = new CristinApiClient();
-        URL invalidUrl = Paths.get("/dev/null").toUri().toURL();
+        URL invalidUrl = Paths.get(DEV_NULL).toUri().toURL();
         cristinApiClient.fetchQueryInstitutionsResults(invalidUrl);
     }
 
     @Test
     public void testCristinInstitutionConnection() throws IOException {
         CristinApiClient cristinApiClient = new CristinApiClient();
-        URL invalidUrl = Paths.get("/dev/null").toUri().toURL();
+        URL invalidUrl = Paths.get(DEV_NULL).toUri().toURL();
         cristinApiClient.fetchGetInstitutionResult(invalidUrl);
     }
 
     @Test(expected = IOException.class)
     public void testExceptionOnInvalidJson() throws IOException {
         CristinApiClient cristinApiClient = new CristinApiClient();
-        String invalidJson = "asdf";
-        InputStream inputStream = new ByteArrayInputStream(invalidJson.getBytes(Charset.forName("UTF-8")));
+        InputStream inputStream = new ByteArrayInputStream(INVALID_JSON.getBytes(Charset.forName("UTF-8")));
         InputStreamReader reader = new InputStreamReader(inputStream);
         cristinApiClient.fromJson(reader, Institution.class);
         fail();
