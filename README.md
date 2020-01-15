@@ -66,6 +66,7 @@ Example response body:
 
 
 #### Response
+
 Returns a JSON array of all subunits for the provided unit (cristinUnitId), or an empty JSON array if the provided unit does not have any subunits.
 
 Example response body:
