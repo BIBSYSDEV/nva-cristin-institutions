@@ -49,7 +49,7 @@ Example response body:
 
 #### HTTP Status Codes
 
-* 200 - Ok, returns an array of 0-10 projects.
+* 200 - Ok, returns an array of 0-5 institutions.
 * 400 - Bad request, returned if the parameters are invalid.
 * 500 - Internal server error, returned if a problem is encountered retrieving institution data
 
