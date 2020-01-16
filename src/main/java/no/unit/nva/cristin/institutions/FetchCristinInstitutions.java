@@ -34,6 +34,13 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
     private static final String DEFAULT_LANGUAGE_CODE = "nb";
     private static final List<String> VALID_LANGUAGE_CODES = Arrays.asList("nb", "en");
 
+    private static final String CRISTIN_QUERY_PARAMETER_NAME_KEY = "name";
+    private static final String CRISTIN_QUERY_PARAMETER_LANGUAGE_KEY = "lang";
+    private static final String CRISTIN_QUERY_PARAMETER_PAGE_KEY = "page";
+    private static final String CRISTIN_QUERY_PARAMETER_PAGE_VALUE = "1";
+    private static final String CRISTIN_QUERY_PARAMETER_PER_PAGE_KEY = "per_page";
+    private static final String CRISTIN_QUERY_PARAMETER_PER_PAGE_VALUE = "5";
+
     private transient CristinApiClient cristinApiClient;
     private final transient PresentationConverter presentationConverter = new PresentationConverter();
 
@@ -67,14 +74,8 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
         String language = queryStringParameters.getOrDefault(LANGUAGE_KEY, DEFAULT_LANGUAGE_CODE);
 
         try {
-
-            Map<String, String> parameters = new ConcurrentHashMap<>();
-            parameters.put("name", name);
-            parameters.put("lang", language);
-            parameters.put("page", "1");
-            parameters.put("per_page", "5");
-
-            List<Institution> institutions = cristinApiClient.queryInstitutions(parameters);
+            Map<String, String> cristinQueryParameters = createCristinQueryParameters(name, language);
+            List<Institution> institutions = cristinApiClient.queryInstitutions(cristinQueryParameters);
             List<InstitutionPresentation> institutionPresentations = institutions.stream()
                     .map(institution -> {
                         try {
@@ -129,6 +130,15 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
             }
         }
         return true;
+    }
+
+    private Map<String, String> createCristinQueryParameters(String name, String language) {
+        Map<String, String> queryParameters = new ConcurrentHashMap<>();
+        queryParameters.put(CRISTIN_QUERY_PARAMETER_NAME_KEY, name);
+        queryParameters.put(CRISTIN_QUERY_PARAMETER_LANGUAGE_KEY, language);
+        queryParameters.put(CRISTIN_QUERY_PARAMETER_PAGE_KEY, CRISTIN_QUERY_PARAMETER_PAGE_VALUE);
+        queryParameters.put(CRISTIN_QUERY_PARAMETER_PER_PAGE_KEY, CRISTIN_QUERY_PARAMETER_PER_PAGE_VALUE);
+        return queryParameters;
     }
 
 }
