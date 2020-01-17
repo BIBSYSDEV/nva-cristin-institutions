@@ -25,12 +25,13 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
     private static final String NAME_KEY = "name";
     private static final String LANGUAGE_KEY = "language";
 
-    private static final String NAME_IS_NULL = "Parameter 'name' is mandatory";
-    private static final String NAME_ILLEGAL_CHARACTERS = "Parameter 'name' may only contain alphanumeric "
+    protected static final String NAME_IS_NULL = "Parameter 'name' is mandatory";
+    protected static final String NAME_ILLEGAL_CHARACTERS = "Parameter 'name' may only contain alphanumeric "
             + "characters, dash and whitespace";
-    private static final String LANGUAGE_INVALID = "Parameter 'language' has invalid value";
+    protected static final String LANGUAGE_INVALID = "Parameter 'language' has invalid value";
 
     private static final String EMPTY_STRING = "";
+    private static final char CHARACTER_DASH = '-';
     private static final String DEFAULT_LANGUAGE_CODE = "nb";
     private static final List<String> VALID_LANGUAGE_CODES = Arrays.asList("nb", "en");
 
@@ -125,11 +126,15 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
     private boolean isValidName(String str) {
         char[] charArray = str.toCharArray();
         for (char c : charArray) {
-            if (!Character.isWhitespace(c) && !Character.isLetterOrDigit(c) && c != '-') {
+            if (!isValidCharacter(c)) {
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean isValidCharacter(char c) {
+        return Character.isWhitespace(c) || Character.isLetterOrDigit(c) || c == CHARACTER_DASH;
     }
 
     private Map<String, String> createCristinQueryParameters(String name, String language) {
