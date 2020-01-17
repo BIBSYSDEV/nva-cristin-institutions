@@ -29,6 +29,7 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
     private static final String ID_IS_NULL = "Parameter 'id' is mandatory";
     private static final String LANGUAGE_INVALID = "Parameter 'language' has invalid value";
 
+    private static final String EMPTY_STRING = "";
     private static final String DEFAULT_LANGUAGE_CODE = "nb";
     private static final List<String> VALID_LANGUAGE_CODES = Arrays.asList("nb", "en");
 
@@ -86,7 +87,7 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
     @SuppressWarnings("unchecked")
     private void checkParameters(Map<String, Object> input) {
         Map<String, String> pathParameters = (Map<String, String>) input.get(PATH_PARAMETERS_KEY);
-        String id = pathParameters.getOrDefault(ID_KEY, "");
+        String id = pathParameters.getOrDefault(ID_KEY, EMPTY_STRING);
         if (id.isEmpty()) {
             throw new RuntimeException(ID_IS_NULL);
 
