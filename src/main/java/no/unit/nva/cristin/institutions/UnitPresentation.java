@@ -7,5 +7,6 @@ public class UnitPresentation {
 
     public String cristinUnitId;
     public List<NamePresentation> unitNames = new ArrayList<>();
+    public List<SubunitPresentation> subunits = new ArrayList<>();
 
 }
