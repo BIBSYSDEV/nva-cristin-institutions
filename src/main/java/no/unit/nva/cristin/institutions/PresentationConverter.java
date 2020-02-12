@@ -33,6 +33,27 @@ public class PresentationConverter {
 
         UnitPresentation unitPresentation = new UnitPresentation();
 
+        if (Optional.ofNullable(unit.institution).isPresent()) {
+            UnitInstitutionPresentation unitInstitutionPresentation = new UnitInstitutionPresentation();
+            unitInstitutionPresentation.cristinInstitutionId = unit.institution.cristinInstitutionId;
+            unitPresentation.institution = unitInstitutionPresentation;
+        }
+
+        if (Optional.ofNullable(unit.parentUnit).isPresent()) {
+            ParentUnitPresentation parentUnitPresentation = new ParentUnitPresentation();
+            parentUnitPresentation.cristinUnitId = unit.parentUnit.cristinUnitId;
+            Optional.ofNullable(unit.parentUnit.unitName).orElse(new TreeMap<>())
+                    .forEach((language, name) -> {
+                        NamePresentation namePresentation = new NamePresentation();
+                        namePresentation.language = language;
+                        namePresentation.name = name;
+                        parentUnitPresentation.parentUnitNames.add(namePresentation);
+                    });
+
+            unitPresentation.parentUnit = parentUnitPresentation;
+        }
+
+
         unitPresentation.cristinUnitId = unit.cristinUnitId;
 
         Optional.ofNullable(unit.unitName).orElse(new TreeMap<>())
