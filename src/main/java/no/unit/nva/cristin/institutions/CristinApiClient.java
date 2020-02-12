@@ -38,7 +38,7 @@ public class CristinApiClient {
         URL url = generateGetInstitutionUrl(id, language);
         try (InputStreamReader streamReader = fetchGetInstitutionResult(url)) {
             return fromJson(streamReader,
-                    new TypeToken<ArrayList<Institution>>(){}.getType());
+                    new TypeToken<Institution>(){}.getType());
         }
     }
 
