@@ -1,6 +1,6 @@
 # nva-cristin-institutions
 
-Lambda for fetching institution and unitObject data from the [Cristin API](https://api.cristin.no/v2/doc/index.html)
+Lambda for fetching institution and unit data from the [Cristin API](https://api.cristin.no/v2/doc/index.html)
 
 
 ### GET cristin-institutions?{parameters}
@@ -54,7 +54,7 @@ Example response body:
 * 500 - Internal server error, returned if a problem is encountered retrieving institution data
 
 
-### GET cristin-institutions/unitObject/{id}?
+### GET cristin-institutions/unit/{id}?
 
 | Path parameter | Description |
 | ------ | ------ |
@@ -67,7 +67,7 @@ Example response body:
 
 #### Response
 
-Returns a JSON array of all subunits for the provided unitObject (cristinUnitId), or an empty JSON array if the provided unitObject does not have any subunits.
+Returns a JSON array of all subunits for the provided unit (cristinUnitId), or an empty JSON array if the provided unit does not have any subunits.
 
 Example response body:
 
@@ -117,4 +117,4 @@ Example response body:
 
 * 200 - Ok, returns an array of 0-n subunits.
 * 400 - Bad request, returned if the parameters are invalid.
-* 500 - Internal server error, returned if a problem is encountered retrieving unitObject data
+* 500 - Internal server error, returned if a problem is encountered retrieving unit data
