@@ -5,7 +5,6 @@ import no.unit.nva.cristin.institutions.model.Identifier;
 import no.unit.nva.cristin.institutions.model.Institution;
 import no.unit.nva.cristin.institutions.model.InstitutionBuilder;
 import no.unit.nva.cristin.institutions.model.UnitObject;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
@@ -18,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class CristinApiClient {
@@ -84,9 +84,10 @@ public class CristinApiClient {
     public UnitObject getUnit(Identifier identifier, String language) throws ExecutionException,
             InterruptedException, URISyntaxException {
         Identifier subunitId = identifier.isSectionIdentifierQualified() ? identifier : null;
-        UnitObject[] allUnitObjects = ArrayUtils.addAll(httpExecutor.execute(
+        UnitObject[] allUnitObjects = Stream.of(httpExecutor.execute(
                 generateInstitutionUri(identifier.getInstitutionIdentifier(), language)),
-                httpExecutor.execute(generateSubunitsUri(identifier.getInstitutionIdentifier(), language)));
+                httpExecutor.execute(generateSubunitsUri(identifier.getInstitutionIdentifier(), language)))
+                .flatMap(Stream::of).toArray(UnitObject[]::new);
         Nester nester = new Nester(allUnitObjects, subunitId);
         return nester.getUnitObject();
     }
