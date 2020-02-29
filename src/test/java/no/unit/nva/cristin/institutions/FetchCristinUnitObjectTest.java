@@ -1,89 +1,56 @@
 package no.unit.nva.cristin.institutions;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import no.unit.nva.cristin.institutions.model.Identifier;
+import no.unit.nva.cristin.institutions.util.UnitGenerator;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FetchCristinUnitTest {
+@ExtendWith(MockitoExtension.class)
+public class FetchCristinUnitObjectTest {
 
-    private static final String CRISTIN_GET_UNIT_WITH_SUBUNITS_FIRST_RESPONSE_JSON_FILE =
-            "/cristinGetUnitWithSubunitsFirstResponse.json";
-    private static final String CRISTIN_GET_UNIT_WITH_SUBUNITS_SECOND_RESPONSE_JSON_FILE =
-            "/cristinGetUnitWithSubunitsSecondResponse.json";
-    private static final String CRISTIN_GET_UNIT_WITHOUT_SUBUNITS_RESPONSE_JSON_FILE =
-            "/cristinGetUnitWithoutSubunitsResponse.json";
     private static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
     private static final String PATH_PARAMETERS_KEY = "pathParameters";
     private static final String ID_KEY = "id";
     private static final String LANGUAGE_KEY = "language";
     private static final String LANGUAGE_INVALID = "invalid";
-    private static final String DEV_NULL = "/dev/null";
     private static final String EMPTY_STRING = "";
     private static final String LANGUAGE_NB = "nb";
     private static final String ID_NTNU = "194.0.0.0";
-    private static final String MOCK_EXCEPTION = "Mock exception";
-
-
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
+    public static final String AN_INVALID_IDENTIFIER = "an invalid identifier";
+    public static final String ERROR_INVALID_IDENTIFIER = "{\"error\":\"The input id \\\"" + AN_INVALID_IDENTIFIER
+                    + "\\\" did not have expected structure \\\"{integer}.{integer}.{integer}.{integer}\\\"\"}";
+    public static final String ERROR_PARAMETER_ID_IS_MANDATORY = "{\"error\":\"Parameter 'id' is mandatory\"}";
+    public static final String ERROR_PARAMETER_LANGUAGE_HAS_INVALID_VALUE =
+            "{\"error\":\"Parameter 'language' has invalid value\"}";
 
     @Mock
     CristinApiClient mockCristinApiClient;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
-
-    private InputStreamReader mockGetCristinUnitWithSubunitsFirstResponseReader() {
-        InputStream getResultAsStream = FetchCristinInstitutionsTest.class
-                .getResourceAsStream(CRISTIN_GET_UNIT_WITH_SUBUNITS_FIRST_RESPONSE_JSON_FILE);
-        return new InputStreamReader(getResultAsStream);
-    }
-
-    private InputStreamReader mockGetCristinUnitWithSubunitsSecondResponseReader() {
-        InputStream getResultAsStream = FetchCristinInstitutionsTest.class
-                .getResourceAsStream(CRISTIN_GET_UNIT_WITH_SUBUNITS_SECOND_RESPONSE_JSON_FILE);
-        return new InputStreamReader(getResultAsStream);
-    }
-
-    private InputStreamReader mockGetCristinUnitWithoutSubunitsResponseReader() {
-        InputStream getResultAsStream = FetchCristinInstitutionsTest.class
-                .getResourceAsStream(CRISTIN_GET_UNIT_WITHOUT_SUBUNITS_RESPONSE_JSON_FILE);
-        return new InputStreamReader(getResultAsStream);
-    }
-
-
     @Test
     public void testFetchCristinUnitSuccessfulResponse() throws Exception {
-        when(mockCristinApiClient.fetchGetUnitResult(any()))
-                .thenReturn(mockGetCristinUnitWithSubunitsFirstResponseReader());
-        when(mockCristinApiClient.getUnit(any(), any())).thenCallRealMethod();
-        when(mockCristinApiClient.generateGetUnitUrl(any(), any())).thenCallRealMethod();
+
+        when(mockCristinApiClient.getUnit(any(), any()))
+                .thenReturn(UnitGenerator.generateMockUnit(new Identifier(100, 2, 1, 1), "nb"));
 
         Map<String, Object> event = new HashMap<>();
 
@@ -105,7 +72,7 @@ public class FetchCristinUnitTest {
 
     @Test
     public void testErrorResponse() throws Exception {
-        when(mockCristinApiClient.getUnit(any(), any())).thenThrow(new IOException(MOCK_EXCEPTION));
+        when(mockCristinApiClient.getUnit(any(), any())).thenThrow(new InterruptedException());
 
         Map<String, Object> event = new HashMap<>();
 
@@ -138,7 +105,7 @@ public class FetchCristinUnitTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatusCode());
         assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
-        assertEquals(response.getBody(), "{\"error\":\"Parameter 'id' is mandatory\"}");
+        assertEquals(response.getBody(), ERROR_PARAMETER_ID_IS_MANDATORY);
     }
 
 
@@ -160,14 +127,29 @@ public class FetchCristinUnitTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatusCode());
         assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
-        assertEquals(response.getBody(), "{\"error\":\"Parameter 'language' has invalid value\"}");
+        assertEquals(response.getBody(), ERROR_PARAMETER_LANGUAGE_HAS_INVALID_VALUE);
     }
 
     @Test
-    public void testCristinUnitConnection() throws IOException {
-        CristinApiClient cristinApiClient = new CristinApiClient();
-        URL invalidUrl = Paths.get(DEV_NULL).toUri().toURL();
-        cristinApiClient.fetchGetUnitResult(invalidUrl);
+    public void test_badlyFormattedIdentifier() {
+        Map<String, Object> event = new HashMap<>();
+
+        Map<String, String> pathParams = new TreeMap<>();
+        pathParams.put(ID_KEY, AN_INVALID_IDENTIFIER);
+        event.put(PATH_PARAMETERS_KEY, pathParams);
+
+        Map<String, String> queryParams = new TreeMap<>();
+        queryParams.put(LANGUAGE_KEY, LANGUAGE_NB);
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
+        FetchCristinUnit mockFetchCristinUnit = new FetchCristinUnit(mockCristinApiClient);
+        GatewayResponse response = mockFetchCristinUnit.handleRequest(event, null);
+
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatusCode());
+        assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
+        assertEquals(ERROR_INVALID_IDENTIFIER,
+                response.getBody());
     }
+
+
 
 }

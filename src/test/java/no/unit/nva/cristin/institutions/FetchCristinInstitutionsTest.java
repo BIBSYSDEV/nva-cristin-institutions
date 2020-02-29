@@ -1,41 +1,33 @@
 package no.unit.nva.cristin.institutions;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import no.unit.nva.cristin.institutions.model.Identifier;
+import no.unit.nva.cristin.institutions.model.Institution;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.TreeMap;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FetchCristinInstitutionsTest {
 
-    private static final String CRISTIN_GET_INSTITUTION_RESPONSE_JSON_FILE = "/cristinGetInstitutionResponse.json";
-    private static final String CRISTIN_QUERY_INSTITUTION_RESPONSE_JSON_FILE = "/cristinQueryInstitutionsResponse.json";
     private static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
     private static final String NAME_KEY = "name";
     private static final String LANGUAGE_KEY = "language";
@@ -43,46 +35,22 @@ public class FetchCristinInstitutionsTest {
     private static final String LANGUAGE_INVALID = "invalid";
     private static final String NAME_NTNU = "ntnu";
     private static final String NAME_ILLEGAL_CHARACTERS = "abc123- ?";
-    private static final String INVALID_JSON = "This is not valid JSON!";
-    private static final String DEV_NULL = "/dev/null";
     private static final String MOCK_EXCEPTION = "Mock exception";
+    public static final int CHAR_A = 97;
+    public static final int CHAR_Z = 122;
 
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     CristinApiClient mockCristinApiClient;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
-
-    private InputStreamReader mockQueryCristinQueryInstitutionResponseReader() {
-        InputStream getResultAsStream = FetchCristinInstitutionsTest.class
-                .getResourceAsStream(CRISTIN_QUERY_INSTITUTION_RESPONSE_JSON_FILE);
-        return new InputStreamReader(getResultAsStream);
-    }
-
-    private InputStreamReader mockGetCristinGetInstitutionResponseReader() {
-        InputStream getResultAsStream = FetchCristinInstitutionsTest.class
-                .getResourceAsStream(CRISTIN_GET_INSTITUTION_RESPONSE_JSON_FILE);
-        return new InputStreamReader(getResultAsStream);
-    }
-
-
     @Test
     public void testFetchCristinInstitutionsSuccessfulResponse() throws Exception {
-        when(mockCristinApiClient.fetchQueryInstitutionsResults(any()))
-                .thenReturn(mockQueryCristinQueryInstitutionResponseReader());
-        when(mockCristinApiClient.fetchGetInstitutionResult(any()))
-                .thenAnswer(i -> mockGetCristinGetInstitutionResponseReader());
-        when(mockCristinApiClient.queryInstitutions(any())).thenCallRealMethod();
-        when(mockCristinApiClient.getInstitution(any(), any())).thenCallRealMethod();
-        when(mockCristinApiClient.generateQueryInstitutionsUrl(any())).thenCallRealMethod();
-        when(mockCristinApiClient.generateGetInstitutionUrl(any(), any())).thenCallRealMethod();
-
+        when(mockCristinApiClient.getInstitutions(any())).thenReturn(getMockInstitutions(5));
         Map<String, Object> event = new HashMap<>();
         Map<String, String> queryParams = new TreeMap<>();
         queryParams.put(NAME_KEY, NAME_NTNU);
@@ -97,9 +65,25 @@ public class FetchCristinInstitutionsTest {
         assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
     }
 
+    private Institution[] getMockInstitutions(int count) {
+
+        List<Institution> institutionList = new ArrayList<>();
+        Random random = new Random();
+
+        while (count > 0) {
+            institutionList.add(new Institution(new Identifier(count).getInstitutionIdentifier(),
+                    random.ints(CHAR_A, CHAR_Z + 1)
+                            .limit(10)
+                            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                            .toString()));
+            count--;
+        }
+        return institutionList.toArray(Institution[]::new);
+    }
+
     @Test
     public void testQueryErrorResponse() throws Exception {
-        when(mockCristinApiClient.queryInstitutions(any())).thenThrow(new IOException(MOCK_EXCEPTION));
+        when(mockCristinApiClient.getInstitutions(any())).thenThrow(new InterruptedException(MOCK_EXCEPTION));
 
         Map<String, Object> event = new HashMap<>();
         Map<String, String> queryParams = new TreeMap<>();
@@ -116,11 +100,7 @@ public class FetchCristinInstitutionsTest {
 
     @Test
     public void testSuccessfulResponseWithGetInstitutionFailure() throws Exception {
-        when(mockCristinApiClient.fetchQueryInstitutionsResults(any()))
-                .thenReturn(mockQueryCristinQueryInstitutionResponseReader());
-        when(mockCristinApiClient.queryInstitutions(any())).thenCallRealMethod();
-        when(mockCristinApiClient.getInstitution(any(), any())).thenThrow(new IOException(MOCK_EXCEPTION));
-        when(mockCristinApiClient.generateQueryInstitutionsUrl(any())).thenCallRealMethod();
+        when(mockCristinApiClient.getInstitutions(any())).thenReturn(getMockInstitutions(5));
 
         Map<String, Object> event = new HashMap<>();
         Map<String, String> queryParams = new TreeMap<>();
@@ -187,34 +167,5 @@ public class FetchCristinInstitutionsTest {
         assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
         assertTrue(response.getBody().contains(FetchCristinInstitutions.LANGUAGE_INVALID));
 
-    }
-
-    @Test
-    public void testCristinGenerateQueryInstitutionsUrlFromNull() throws IOException, URISyntaxException {
-        CristinApiClient cristinApiClient = new CristinApiClient();
-        cristinApiClient.generateQueryInstitutionsUrl(null);
-    }
-
-    @Test
-    public void testCristinInstitutionsConnection() throws IOException {
-        CristinApiClient cristinApiClient = new CristinApiClient();
-        URL invalidUrl = Paths.get(DEV_NULL).toUri().toURL();
-        cristinApiClient.fetchQueryInstitutionsResults(invalidUrl);
-    }
-
-    @Test
-    public void testCristinInstitutionConnection() throws IOException {
-        CristinApiClient cristinApiClient = new CristinApiClient();
-        URL invalidUrl = Paths.get(DEV_NULL).toUri().toURL();
-        cristinApiClient.fetchGetInstitutionResult(invalidUrl);
-    }
-
-    @Test(expected = IOException.class)
-    public void testExceptionOnInvalidJson() throws IOException {
-        CristinApiClient cristinApiClient = new CristinApiClient();
-        InputStream inputStream = new ByteArrayInputStream(INVALID_JSON.getBytes(Charset.forName("UTF-8")));
-        InputStreamReader reader = new InputStreamReader(inputStream);
-        cristinApiClient.fromJson(reader, Institution.class);
-        fail();
     }
 }

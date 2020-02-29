@@ -1,106 +1,130 @@
 package no.unit.nva.cristin.institutions;
 
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import no.unit.nva.cristin.institutions.model.Identifier;
+import no.unit.nva.cristin.institutions.model.Institution;
+import no.unit.nva.cristin.institutions.model.InstitutionBuilder;
+import no.unit.nva.cristin.institutions.model.UnitObject;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.client.utils.URIBuilder;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 
 public class CristinApiClient {
 
-    private static final String HTTPS = "https";
+    public static final String EQUALS_SIGN = "=";
+    public static final String AMPERSAND = "&";
+    private final transient HttpExecutor httpExecutor;
+    private static final String SCHEME = "https";
     private static final String CRISTIN_API_HOST = "api.cristin.no";
-    private static final String CRISTIN_API_INSTITUTIONS_PATH = "/v2/institutions/";
-    private static final String CRISTIN_API_UNITS_PATH = "/v2/units/";
+    private static final String API_VERSION = "v2";
+    private static final String CRISTIN_API_INSTITUTIONS_PATH = "institutions";
+    private static final String CRISTIN_API_UNITS_PATH = "units";
+    private static final String PER_PAGE_KEY = "per_page";
+    private static final String COUNTRY_KEY = "country";
+    private static final String LANGUAGE_KEY = "lang";
+    private static final String PARENT_UNIT_ID_KEY = "parent_unit_id";
+    private static final String COUNTRY_VALUE = "NO";
+    private static final String PER_PAGE_VALUE = "100000";
 
-    protected List<Institution> queryInstitutions(Map<String, String> parameters) throws
-            IOException, URISyntaxException {
-        URL url = generateQueryInstitutionsUrl(parameters);
-        try (InputStreamReader streamReader = fetchQueryInstitutionsResults(url)) {
-            return fromJson(streamReader,
-                    new TypeToken<ArrayList<Institution>>(){}.getType());
-        }
+    /**
+     * API client to connect to Cristin.
+     */
+    protected CristinApiClient() {
+        httpExecutor = new HttpExecutorImpl();
     }
 
-    protected Institution getInstitution(String id, String language) throws IOException, URISyntaxException {
-        URL url = generateGetInstitutionUrl(id, language);
-        try (InputStreamReader streamReader = fetchGetInstitutionResult(url)) {
-            return fromJson(streamReader,
-                    new TypeToken<Institution>(){}.getType());
-        }
+    /**
+     * API client for testing.
+     *
+     * @param executor A mocked HttpExecutor
+     */
+    public CristinApiClient(HttpExecutor executor) {
+        httpExecutor = executor;
     }
 
-    protected Unit getUnit(String id, String language) throws IOException, URISyntaxException {
-        URL url = generateGetUnitUrl(id, language);
-        try (InputStreamReader streamReader = fetchGetUnitResult(url)) {
-            return fromJson(streamReader, new TypeToken<Unit>(){}.getType());
-        }
+    /**
+     * Returns a list of for customer institutions in Norway.
+     *
+     * @param language One of {en, nb, nn}
+     * @return An array of institutions
+     * @throws ExecutionException   In case the HTTP request failed
+     * @throws InterruptedException In case the HTTP request failed to complete
+     * @throws URISyntaxException   In case the URI passed was malformed
+     */
+    public Institution[] getInstitutions(String language) throws ExecutionException,
+            InterruptedException, URISyntaxException {
+        UnitObject[] unitObjects = httpExecutor.execute(generateInstitutionsUri(language));
+        return Arrays.stream(unitObjects).filter(UnitObject::isCristinUser)
+                .map(unit -> new InstitutionBuilder(new Identifier(unit.getId())).withName(unit.getName()).build())
+                .toArray(Institution[]::new);
     }
 
-    protected InputStreamReader fetchQueryInstitutionsResults(URL url) throws IOException {
-        return new InputStreamReader(url.openStream());
+    /**
+     * This method gets a specific organizational unit, either institution, faculty, department or section,
+     * including all parent units.
+     *
+     * @param identifier An identifier object
+     * @param language   One of {en, nb, nn}
+     * @return A single unit with subunits
+     * @throws ExecutionException   In case the HTTP request failed
+     * @throws InterruptedException In case the HTTP request failed to complete
+     * @throws URISyntaxException   In case the URI passed was malformed
+     */
+    public UnitObject getUnit(Identifier identifier, String language) throws ExecutionException,
+            InterruptedException, URISyntaxException {
+        Identifier subunitId = identifier.isSectionIdentifierQualified() ? identifier : null;
+        UnitObject[] allUnitObjects = ArrayUtils.addAll(httpExecutor.execute(
+                generateInstitutionUri(identifier.getInstitutionIdentifier(), language)),
+                httpExecutor.execute(generateSubunitsUri(identifier.getInstitutionIdentifier(), language)));
+        Nester nester = new Nester(allUnitObjects, subunitId);
+        return nester.getUnitObject();
     }
 
-    protected InputStreamReader fetchGetInstitutionResult(URL url) throws IOException {
-        return new InputStreamReader(url.openStream());
+    private URI generateSubunitsUri(String id, String language) throws URISyntaxException {
+        Map<String, String> queryParameters = new ConcurrentHashMap<>();
+        queryParameters.put(LANGUAGE_KEY, language);
+        queryParameters.put(PER_PAGE_KEY, PER_PAGE_VALUE);
+        queryParameters.put(PARENT_UNIT_ID_KEY, id);
+        return generateUri(queryParameters, CRISTIN_API_UNITS_PATH);
     }
 
-    protected InputStreamReader fetchGetUnitResult(URL url) throws IOException {
-        return new InputStreamReader(url.openStream());
+    private URI generateInstitutionUri(String id, String language) throws URISyntaxException {
+        Map<String, String> queryParameters = Collections.singletonMap(LANGUAGE_KEY, language);
+        return generateUri(queryParameters, CRISTIN_API_UNITS_PATH, id);
     }
 
-    protected URL generateQueryInstitutionsUrl(Map<String, String> parameters) throws MalformedURLException,
-            URISyntaxException {
-        URIBuilder uri = new URIBuilder()
-                .setScheme(HTTPS)
+    protected URI generateInstitutionsUri(String language) throws URISyntaxException {
+        Map<String, String> queryParameters = new ConcurrentHashMap<>();
+        queryParameters.put(COUNTRY_KEY, COUNTRY_VALUE);
+        queryParameters.put(PER_PAGE_KEY, PER_PAGE_VALUE);
+        queryParameters.put(LANGUAGE_KEY, language);
+        return generateUri(queryParameters, CRISTIN_API_INSTITUTIONS_PATH);
+    }
+
+    private URI generateUri(Map<String, String> queryParameters, String... pathSegment) throws URISyntaxException {
+        List<String> pathSegments = new ArrayList<>();
+        pathSegments.add(API_VERSION);
+        pathSegments.addAll(Arrays.stream(pathSegment).collect(Collectors.toList()));
+
+        String query = queryParameters.entrySet().stream()
+                .map(entry -> entry.getKey() + EQUALS_SIGN + entry.getValue()).collect(Collectors.joining(AMPERSAND));
+
+        return new URIBuilder()
+                .setScheme(SCHEME)
                 .setHost(CRISTIN_API_HOST)
-                .setPath(CRISTIN_API_INSTITUTIONS_PATH);
-        if (parameters != null) {
-            parameters.keySet().forEach(s -> uri.addParameter(s, parameters.get(s)));
-        }
-        return uri.build().toURL();
-    }
-
-    protected URL generateGetInstitutionUrl(String id, String language) throws
-            MalformedURLException, URISyntaxException {
-        URI uri = new URIBuilder()
-                .setScheme(HTTPS)
-                .setHost(CRISTIN_API_HOST)
-                .setPath(CRISTIN_API_INSTITUTIONS_PATH + id)
-                .addParameter("lang", language)
+                .setPathSegments(pathSegments)
+                .setCustomQuery(query)
                 .build();
-        return uri.toURL();
     }
-
-    protected URL generateGetUnitUrl(String id, String language) throws MalformedURLException, URISyntaxException {
-        URI uri = new URIBuilder()
-                .setScheme(HTTPS)
-                .setHost(CRISTIN_API_HOST)
-                .setPath(CRISTIN_API_UNITS_PATH + id)
-                .addParameter("lang", language)
-                .build();
-        return uri.toURL();
-    }
-
-    protected static <T> T fromJson(InputStreamReader reader, Type type) throws IOException {
-        try {
-            return new Gson().fromJson(reader, type);
-        } catch (JsonSyntaxException e) {
-            final String s = e.getMessage() + " " + reader;
-            throw new IOException(s, e);
-        }
-    }
-
 }

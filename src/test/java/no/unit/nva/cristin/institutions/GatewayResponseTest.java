@@ -1,24 +1,19 @@
 package no.unit.nva.cristin.institutions;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.ws.rs.core.Response;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class GatewayResponseTest {
 
     private static final String EMPTY_STRING = "";
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
 
     public static final String CORS_HEADER = "CORS header";
     public static final String MOCK_BODY = "mock";
@@ -27,12 +22,11 @@ public class GatewayResponseTest {
 
     @Test
     public void testErrorResponse() {
-        String expectedJson = ERROR_JSON;
         // calling real constructor (no need to mock as this is not talking to the internet)
         // but helps code coverage
         GatewayResponse gatewayResponse = new GatewayResponse(MOCK_BODY, Response.Status.CREATED.getStatusCode());
         gatewayResponse.setErrorBody(ERROR_BODY);
-        assertEquals(expectedJson, gatewayResponse.getBody());
+        assertEquals(ERROR_JSON, gatewayResponse.getBody());
     }
 
     @Test
