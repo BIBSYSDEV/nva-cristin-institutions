@@ -7,13 +7,12 @@ Lambda for fetching institution and unit data from the [Cristin API](https://api
 
 | Query parameter | Description |
 | ------ | ------ |
-| name | Name, part of name or acronym. Accepts letters, digits, dash and whitespace. (Mandatory) |
-| language | Preferred language for names. Accepts 'nb' or 'en'. (Optional) |
+| language | Preferred language for names. Accepts 'en', nb or 'nn'. (Optional) |
 
 
 #### Response
 
-Returns a JSON array of up to 5 institutions, or an empty JSON array if no institutions are found.
+Returns a JSON array of all Cristin user institutions.
 
 Example response body:
 

@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +33,6 @@ public class FetchCristinInstitutionsTest {
     private static final String LANGUAGE_NB = "nb";
     private static final String LANGUAGE_INVALID = "invalid";
     private static final String NAME_NTNU = "ntnu";
-    private static final String NAME_ILLEGAL_CHARACTERS = "abc123- ?";
     private static final String MOCK_EXCEPTION = "Mock exception";
     public static final int CHAR_A = 97;
     public static final int CHAR_Z = 122;
@@ -115,41 +113,6 @@ public class FetchCristinInstitutionsTest {
         assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
     }
 
-
-    @Test
-    public void testEmptyNameParam() {
-
-        Map<String, Object> event = new HashMap<>();
-        Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put(NAME_KEY, "");
-        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
-
-        FetchCristinInstitutions mockFetchCristinInstitutions = new FetchCristinInstitutions(mockCristinApiClient);
-        GatewayResponse response = mockFetchCristinInstitutions.handleRequest(event, null);
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatusCode());
-        assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
-        assertTrue(response.getBody().contains(FetchCristinInstitutions.NAME_IS_NULL));
-
-    }
-
-
-    @Test
-    public void testIllegalCharactersNameParam() {
-
-        Map<String, Object> event = new HashMap<>();
-        Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put(NAME_KEY, NAME_ILLEGAL_CHARACTERS);
-        event.put(QUERY_STRING_PARAMETERS_KEY, queryParams);
-
-        FetchCristinInstitutions mockFetchCristinInstitutions = new FetchCristinInstitutions(mockCristinApiClient);
-        GatewayResponse response = mockFetchCristinInstitutions.handleRequest(event, null);
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatusCode());
-        assertEquals(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), MediaType.APPLICATION_JSON);
-        assertTrue(response.getBody().contains(FetchCristinInstitutions.NAME_ILLEGAL_CHARACTERS));
-
-    }
 
     @Test
     public void testInvalidLanguageParam() {
