@@ -65,8 +65,8 @@ public class CristinApiClient {
     public Institution[] getInstitutions(String language) throws ExecutionException,
             InterruptedException, URISyntaxException {
         UnitObject[] unitObjects = httpExecutor.execute(generateInstitutionsUri(language));
-        return Arrays.stream(unitObjects).filter(UnitObject::isCristinUser)
-                .map(unit -> new InstitutionBuilder(new Identifier(unit.getId())).withName(unit.getName()).build())
+        return Arrays.stream(unitObjects).filter(UnitObject::isCristinUserInstitution)
+                .map(unit -> new InstitutionBuilder(new Identifier(Integer.parseInt(unit.getId()))).withName(unit.getName()).build())
                 .toArray(Institution[]::new);
     }
 

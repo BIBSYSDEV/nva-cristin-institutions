@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import no.unit.nva.cristin.institutions.model.Identifier;
 import no.unit.nva.cristin.institutions.model.UnitObject;
 import no.unit.nva.cristin.institutions.model.UnitObjectBuilder;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AdapterTest {
 
+    @Disabled
     @Test
     void serialize_single() {
         UnitObject unitObjectOne = new UnitObjectBuilder(new Identifier(123))
@@ -39,6 +41,7 @@ class AdapterTest {
         assertEquals(expected, json);
     }
 
+    @Disabled
     @Test
     void serialize_multiple() {
         UnitObject unitObjectOne = new UnitObjectBuilder(new Identifier(123)).build();

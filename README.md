@@ -2,6 +2,24 @@
 
 Lambda for fetching institution and unit data from the [Cristin API](https://api.cristin.no/v2/doc/index.html)
 
+### Invoke lambda functions locally using sam
+
+Update sam som latest:
+```
+pip3 install aws-sam-cli
+```
+
+Build from template with sam:
+```
+sam build
+```
+
+Invoke lambda functions:
+
+```
+sam local invoke "NvaCristinFetchInstitutionsFunction" -e src/test/resources/fetchCristinInstitutionsEvent.json --env-vars src/test/resources/env.json
+sam local invoke "NvaCristinFetchUnitFunction" -e src/test/resources/fetchCristinUnitObjectEvent.json --env-vars src/test/resources/env.json
+```
 
 ### GET cristin-institutions?{parameters}
 

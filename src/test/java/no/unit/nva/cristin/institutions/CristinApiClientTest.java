@@ -3,6 +3,7 @@ package no.unit.nva.cristin.institutions;
 import no.unit.nva.cristin.institutions.model.Identifier;
 import no.unit.nva.cristin.institutions.model.Institution;
 import no.unit.nva.cristin.institutions.model.UnitObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.net.URISyntaxException;
@@ -17,7 +18,7 @@ class CristinApiClientTest {
     public static final String LANGUAGE_NB = "nb";
     public static final String INSTITUTION_IDENTIFIER_ZEROS_MATCH = ".0.0.0";
 
-
+    @Disabled
     @Test
     void getTopLevels() throws ExecutionException, InterruptedException, URISyntaxException {
         HttpExecutor httpExecutor = new HttpExecutorMock();

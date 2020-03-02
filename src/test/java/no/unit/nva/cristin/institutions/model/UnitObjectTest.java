@@ -2,7 +2,6 @@ package no.unit.nva.cristin.institutions.model;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
@@ -80,7 +79,7 @@ class UnitObjectTest {
         assertEquals(acronym, unitObject.getAcronym());
         assertEquals(name, unitObject.getName());
         assertNull(unitObject.getSubunits());
-        assertTrue(unitObject.isCristinUser());
+        assertTrue(unitObject.isCristinUserInstitution());
         assertEquals(EMPTY_STRING, unitObject.getCountry());
         assertEquals(new Identifier(AN_IDENTIFIER_STRING).getIdentifier(), unitObject.getIdentifier().getIdentifier());
     }

@@ -44,7 +44,7 @@ class UnitObjectBuilderTest {
         assertNull(unitObject.getSubunits());
         assertEquals(unitObject.getInstitution(), institution);
         assertEquals(SOME_INSTITUTION_URI, unitObject.getUri());
-        assertTrue(unitObject.isCristinUser());
+        assertTrue(unitObject.isCristinUserInstitution());
     }
 
     @Test

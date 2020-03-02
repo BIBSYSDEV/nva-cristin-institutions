@@ -31,7 +31,7 @@ public class UnitObject {
     private final transient String country;
     @Expose(serialize = false)
     @SerializedName(alternate = "cristin_user_institution", value = "isCristinUser")
-    private final transient boolean cristinUserInstitution;
+    private final boolean cristinUserInstitution;
     @Expose(serialize = false)
     private final transient Map<String, String> institution;
     @Expose(serialize = false)
@@ -140,7 +140,7 @@ public class UnitObject {
         return unitName;
     }
 
-    public boolean isCristinUser() {
+    public boolean isCristinUserInstitution() {
         return this.cristinUserInstitution;
     }
 

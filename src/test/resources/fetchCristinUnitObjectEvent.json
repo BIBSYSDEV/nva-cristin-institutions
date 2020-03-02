@@ -1,0 +1,5 @@
+{
+  "queryStringParameters": {"language":  "nb"},
+  "pathParameters": {"id":  "194.67.80.30"},
+  "httpMethod": "GET"
+}
