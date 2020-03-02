@@ -70,7 +70,6 @@ Resources:
             Method: get
             RequestParameters:
               - method.request.querystring.language
-              - method.request.querystring.name
   #            RequestModel:
   #              Model: Map<String, Object> # REQUIRED; must match the name of a model defined in the Models property of the AWS::Serverless::API
   #              Required: true # OPTIONAL; boolean
