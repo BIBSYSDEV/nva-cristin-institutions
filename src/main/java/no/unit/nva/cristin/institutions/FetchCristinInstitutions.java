@@ -30,7 +30,7 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
     private static final String EMPTY_STRING = "";
     private static final char CHARACTER_DASH = '-';
     private static final String DEFAULT_LANGUAGE_CODE = "nb";
-    private static final List<String> VALID_LANGUAGE_CODES = Arrays.asList("nb", "en");
+    private static final List<String> VALID_LANGUAGE_CODES = Arrays.asList("nb", "nn", "en");
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
