@@ -29,28 +29,63 @@ public class PresentationConverter {
         return institutionPresentation;
     }
 
-    protected List<UnitPresentation> asSubunits(Unit unit) {
+    protected UnitPresentation asUnitPresentation(Unit unit) {
 
-        List<UnitPresentation> unitPresentations = new ArrayList<>();
+        UnitPresentation unitPresentation = new UnitPresentation();
+
+        if (Optional.ofNullable(unit.institution).isPresent()) {
+            UnitInstitutionPresentation unitInstitutionPresentation = new UnitInstitutionPresentation();
+            unitInstitutionPresentation.cristinInstitutionId = unit.institution.cristinInstitutionId;
+            unitPresentation.institution = unitInstitutionPresentation;
+        }
+
+        if (Optional.ofNullable(unit.parentUnit).isPresent()) {
+            ParentUnitPresentation parentUnitPresentation = new ParentUnitPresentation();
+            parentUnitPresentation.cristinUnitId = unit.parentUnit.cristinUnitId;
+            Optional.ofNullable(unit.parentUnit.unitName).orElse(new TreeMap<>())
+                    .forEach((language, name) -> {
+                        NamePresentation namePresentation = new NamePresentation();
+                        namePresentation.language = language;
+                        namePresentation.name = name;
+                        parentUnitPresentation.parentUnitNames.add(namePresentation);
+                    });
+
+            unitPresentation.parentUnit = parentUnitPresentation;
+        }
+
+
+        unitPresentation.cristinUnitId = unit.cristinUnitId;
+
+        Optional.ofNullable(unit.unitName).orElse(new TreeMap<>())
+                .forEach((language, name) -> {
+                    NamePresentation namePresentation = new NamePresentation();
+                    namePresentation.language = language;
+                    namePresentation.name = name;
+                    unitPresentation.unitNames.add(namePresentation);
+                });
+
+        List<SubunitPresentation> subunitPresentations = new ArrayList<>();
 
         Optional.ofNullable(unit.subunits).orElse(new ArrayList<Unit>() {
         }).forEach(subunit -> {
-            UnitPresentation unitPresentation = new UnitPresentation();
+            SubunitPresentation subunitPresentation = new SubunitPresentation();
 
-            unitPresentation.cristinUnitId = subunit.cristinUnitId;
+            subunitPresentation.cristinUnitId = subunit.cristinUnitId;
 
             Optional.ofNullable(subunit.unitName).orElse(new TreeMap<>())
                     .forEach((language, name) -> {
                         NamePresentation namePresentation = new NamePresentation();
                         namePresentation.language = language;
                         namePresentation.name = name;
-                        unitPresentation.unitNames.add(namePresentation);
+                        subunitPresentation.subunitNames.add(namePresentation);
                     });
 
-            unitPresentations.add(unitPresentation);
+            subunitPresentations.add(subunitPresentation);
         });
 
-        return unitPresentations;
+        unitPresentation.subunits = subunitPresentations;
+
+        return unitPresentation;
     }
 
 }

@@ -5,6 +5,15 @@ Description: >
 
   Sample SAM Template for AWS
 
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: cristin-instututions
+    Description: Fetching institution and unit data from the Cristin API
+    Author: Unit
+    SemanticVersion: 1.0.0
+    SpdxLicenseId: MIT
+    LicenseUrl: LICENSE
+
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
@@ -16,7 +25,7 @@ Globals:
         - "'${Domain}'"
         - Domain: !Ref  CorsOrigin
       AllowMethods: "'OPTIONS, GET'"
-      AllowHeaders: "'Content-Type'"
+      AllowHeaders: !Ref CorsAllowHeaders
 
 Parameters:
   CognitoAuthorizerArn:
@@ -31,6 +40,11 @@ Parameters:
   CorsOrigin:
     Type: String
     Description: Value to use for Cors 'Allow...' header if value is set
+    Default: '{{resolve:secretsmanager:DefaultCorsOrigin:SecretString}}'
+  CorsAllowHeaders:
+    Type: String
+    Description: String of headers to allow.
+    Default: '{{resolve:ssm:defaultCorsAllowHeaders:1}}'
 
 Resources:
 
@@ -50,9 +64,7 @@ Resources:
     Properties:
       Environment:
         Variables:
-          AllowOrigin: !Sub
-            - "${Domain}"
-            - Domain: !Ref  CorsOrigin
+          AllowOrigin: !Ref  CorsOrigin
       Handler: no.unit.nva.cristin.institutions.FetchCristinInstitutions::handleRequest
       Runtime: java8
       MemorySize: 512
@@ -77,9 +89,7 @@ Resources:
     Properties:
       Environment:
         Variables:
-          AllowOrigin: !Sub
-            - "${Domain}"
-            - Domain: !Ref  CorsOrigin
+          AllowOrigin: !Ref  CorsOrigin
       Handler: no.unit.nva.cristin.institutions.FetchCristinUnit::handleRequest
       Runtime: java8
       MemorySize: 512

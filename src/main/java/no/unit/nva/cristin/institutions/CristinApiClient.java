@@ -3,18 +3,20 @@ package no.unit.nva.cristin.institutions;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
 
 public class CristinApiClient {
 
@@ -27,21 +29,23 @@ public class CristinApiClient {
             IOException, URISyntaxException {
         URL url = generateQueryInstitutionsUrl(parameters);
         try (InputStreamReader streamReader = fetchQueryInstitutionsResults(url)) {
-            return asList(fromJson(streamReader, Institution[].class));
+            return fromJson(streamReader,
+                    new TypeToken<ArrayList<Institution>>(){}.getType());
         }
     }
 
     protected Institution getInstitution(String id, String language) throws IOException, URISyntaxException {
         URL url = generateGetInstitutionUrl(id, language);
         try (InputStreamReader streamReader = fetchGetInstitutionResult(url)) {
-            return fromJson(streamReader, Institution.class);
+            return fromJson(streamReader,
+                    new TypeToken<Institution>(){}.getType());
         }
     }
 
     protected Unit getUnit(String id, String language) throws IOException, URISyntaxException {
         URL url = generateGetUnitUrl(id, language);
         try (InputStreamReader streamReader = fetchGetUnitResult(url)) {
-            return fromJson(streamReader, Unit.class);
+            return fromJson(streamReader, new TypeToken<Unit>(){}.getType());
         }
     }
 
@@ -90,9 +94,9 @@ public class CristinApiClient {
         return uri.toURL();
     }
 
-    protected static <T> T fromJson(InputStreamReader reader, Class<T> classOfT) throws IOException {
+    protected static <T> T fromJson(InputStreamReader reader, Type type) throws IOException {
         try {
-            return new Gson().fromJson(reader, classOfT);
+            return new Gson().fromJson(reader, type);
         } catch (JsonSyntaxException e) {
             final String s = e.getMessage() + " " + reader;
             throw new IOException(s, e);

@@ -7,9 +7,7 @@ import com.google.gson.reflect.TypeToken;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -70,11 +68,10 @@ public class FetchCristinUnit implements RequestHandler<Map<String, Object>, Gat
         try {
 
             Unit unit = cristinApiClient.getUnit(id, language);
-            List<UnitPresentation> subunitPresentations = presentationConverter.asSubunits(unit);
-            Type unitListType = new TypeToken<ArrayList<UnitPresentation>>() {
-            }.getType();
+            UnitPresentation unitPresentations = presentationConverter.asUnitPresentation(unit);
             gatewayResponse.setStatusCode(Response.Status.OK.getStatusCode());
-            gatewayResponse.setBody(new Gson().toJson(subunitPresentations, unitListType));
+            gatewayResponse.setBody(new Gson().toJson(unitPresentations,
+                    new TypeToken<UnitPresentation>(){}.getType()));
 
         } catch (IOException | URISyntaxException e) {
             gatewayResponse.setStatusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());

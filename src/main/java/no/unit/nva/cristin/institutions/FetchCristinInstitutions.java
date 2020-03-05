@@ -7,7 +7,6 @@ import com.google.gson.reflect.TypeToken;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,11 +89,9 @@ public class FetchCristinInstitutions implements RequestHandler<Map<String, Obje
                     .map(presentationConverter::asInstitutionPresentation)
                     .collect(Collectors.toList());
 
-            Type institutionListType = new TypeToken<ArrayList<InstitutionPresentation>>() {
-            }.getType();
-
             gatewayResponse.setStatusCode(Response.Status.OK.getStatusCode());
-            gatewayResponse.setBody(new Gson().toJson(institutionPresentations, institutionListType));
+            gatewayResponse.setBody(new Gson().toJson(institutionPresentations,
+                    new TypeToken<ArrayList<InstitutionPresentation>>(){}.getType()));
 
         } catch (IOException | URISyntaxException e) {
             gatewayResponse.setStatusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
