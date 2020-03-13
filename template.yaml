@@ -18,7 +18,6 @@ Globals:
     Timeout: 20
   Api:
     Cors:
-      AllowCredentials: true
       AllowMethods: "'OPTIONS, GET'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
       AllowOrigin: "'*'"
