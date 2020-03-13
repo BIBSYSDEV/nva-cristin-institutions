@@ -1,13 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  AWS
-
-  Sample SAM Template for AWS
+  Creates lambdas, api and base path mappings for fetching institutions
 
 Metadata:
   AWS::ServerlessRepo::Application:
-    Name: cristin-instututions
+    Name: Institutions
     Description: Fetching institution and unit data from the Cristin API
     Author: Unit
     SemanticVersion: 1.0.0
@@ -21,11 +19,9 @@ Globals:
   Api:
     Cors:
       AllowCredentials: true
-      AllowOrigin: !Sub
-        - "'${Domain}'"
-        - Domain: !Ref  CorsOrigin
       AllowMethods: "'OPTIONS, GET'"
-      AllowHeaders: !Ref CorsAllowHeaders
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
 
 Parameters:
   CognitoAuthorizerArn:
@@ -37,14 +33,6 @@ Parameters:
   CustomDomainBasePath:
     Type: String
     Description: Base path mapping in CustomDomain
-  CorsOrigin:
-    Type: String
-    Description: Value to use for Cors 'Allow...' header if value is set
-    Default: '{{resolve:secretsmanager:DefaultCorsOrigin:SecretString}}'
-  CorsAllowHeaders:
-    Type: String
-    Description: String of headers to allow.
-    Default: '{{resolve:ssm:defaultCorsAllowHeaders:1}}'
 
 Resources:
 
@@ -64,7 +52,7 @@ Resources:
     Properties:
       Environment:
         Variables:
-          AllowOrigin: !Ref  CorsOrigin
+          AllowOrigin: "'*'"
       Handler: no.unit.nva.cristin.institutions.FetchCristinInstitutions::handleRequest
       Runtime: java8
       MemorySize: 512
@@ -89,7 +77,7 @@ Resources:
     Properties:
       Environment:
         Variables:
-          AllowOrigin: !Ref  CorsOrigin
+          AllowOrigin: "'*'"
       Handler: no.unit.nva.cristin.institutions.FetchCristinUnit::handleRequest
       Runtime: java8
       MemorySize: 512
