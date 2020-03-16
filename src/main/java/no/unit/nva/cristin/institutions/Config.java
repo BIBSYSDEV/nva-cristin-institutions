@@ -3,7 +3,7 @@ package no.unit.nva.cristin.institutions;
 
 public class Config {
 
-    public static final String CORS_ALLOW_ORIGIN_HEADER_ENVIRONMENT_NAME = "AllowOrigin";
+    public static final String CORS_ALLOW_ORIGIN_HEADER_ENVIRONMENT_NAME = "ALLOW_ORIGIN";
 
     private String corsHeader;
 
