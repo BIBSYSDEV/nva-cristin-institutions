@@ -90,6 +90,7 @@ Resources:
             Path: /unit/{id}
             Method: get
             RequestParameters:
+              - method.request.path.id
               - method.request.querystring.language
 
   NvaCristinInstitutionsBasePathMapping:
