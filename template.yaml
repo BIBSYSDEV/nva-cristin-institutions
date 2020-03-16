@@ -51,9 +51,9 @@ Resources:
     Properties:
       Environment:
         Variables:
-          AllowOrigin: "'*'"
+          ALLOWORIGIN: "'*'"
       Handler: no.unit.nva.cristin.institutions.FetchCristinInstitutions::handleRequest
-      Runtime: java8
+      Runtime: java11
       MemorySize: 512
       Events:
         NvaCristinFetchInstitutionsEvent:
@@ -76,9 +76,9 @@ Resources:
     Properties:
       Environment:
         Variables:
-          AllowOrigin: "'*'"
+          ALLOWORIGIN: "'*'"
       Handler: no.unit.nva.cristin.institutions.FetchCristinUnit::handleRequest
-      Runtime: java8
+      Runtime: java11
       MemorySize: 512
       Events:
         NvaCristinFetchUnitEvent:
